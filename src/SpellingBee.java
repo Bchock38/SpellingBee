@@ -38,6 +38,12 @@ public class SpellingBee {
     public SpellingBee(String letters) {
         this.letters = letters;
         words = new ArrayList<String>();
+        //Generate all possible combination of letters
+        generate();
+        //Sort the numbers alphbetically
+        sort();
+        //Check if the words exist in the dictionary
+        checkWords();
     }
 
     // TODO: generate all possible substrings and permutations of the letters.
@@ -45,13 +51,79 @@ public class SpellingBee {
     //  that will find the substrings recursively.
     public void generate() {
         // YOUR CODE HERE — Call your recursive method!
+        makeWords("", letters);
+    }
+
+    public void makeWords (String word, String letters){
+        //If letters is empty/no more letters to add, add word to list of words
+        //End recursive loop/Base Case
+        if (letters.length() == 0 ){
+            words.add(word);
+            return;
+        }
+
+        //generate every premotation
+        for (int i = 0; i < letters.length(); i++){
+            makeWords((word + letters.charAt(i)), letters.substring(0,i) + letters.substring(i+1));
+        }
+
+        //add generated word to words list
+        words.add(word);
+
+
     }
 
     // TODO: Apply mergesort to sort all words. Do this by calling ANOTHER method
     //  that will find the substrings recursively.
-    public void sort() {
-        // YOUR CODE HERE
+    public void sort(){
+        words = mergeSort(words,0,(words.size()-1));
     }
+
+    public ArrayList<String> merge(ArrayList<String> arr1, ArrayList<String> arr2) {
+        //create new arraylist of strings to hold sorted elements
+        ArrayList<String> sol = new ArrayList<String>();
+        int index1 = 0, index2 = 0;
+
+        //While index 1 and 2 have elements to compare, compare them
+        while (index1 < arr1.size() && index2 < arr2.size()) {
+            //if word from index1 is closer to a than index2 add index1 to list
+            if(arr1.get(index1).compareTo(arr2.get(index2)) <= 0 ) {
+                sol.add(arr1.get(index1++));
+            } else {
+                //otherwise add word from index2
+                sol.add(arr2.get(index2++));
+            }
+        }
+
+        // Copy over any remaining elements
+        while (index1 < arr1.size()) {
+            sol.add(arr1.get(index1++));
+        }
+        //copy over any remaining elements
+        while (index2 < arr2.size()) {
+            sol.add(arr2.get(index2++));
+        }
+
+        return sol;
+    }
+
+
+
+    public ArrayList<String> mergeSort(ArrayList<String> arr, int low, int high) {
+        // Base case
+        if (high == low) {
+                ArrayList<String> newArr = new ArrayList<String>();
+                newArr.add(arr.get(low));
+                return newArr;
+            }
+        //sperare the list into two smaller list
+            int med = (high + low) / 2;
+            ArrayList<String> arr1 = mergeSort(arr, low, med);
+            ArrayList<String> arr2 = mergeSort(arr, med + 1, high);
+        //merge together all the smaller list
+            return merge(arr1, arr2);
+        }
+
 
     // Removes duplicates from the sorted list.
     public void removeDuplicates() {
@@ -69,6 +141,28 @@ public class SpellingBee {
     //  If it is not in the dictionary, remove it from words.
     public void checkWords() {
         // YOUR CODE HERE
+        for (int i = 0; i < words.size(); i++){
+            if (!checkWord(words.get(i), 0, DICTIONARY_SIZE - 1)){
+                words.remove(i);
+                i--;
+            }
+        }
+
+    }
+
+    public boolean checkWord(String word, int start, int end){
+        int mid = start + (end - start)/2;
+        if (DICTIONARY[mid].equals(word)){
+            return true;
+        }
+        if (start == end){
+            return false;
+        }
+        if (word.compareTo(DICTIONARY[mid]) < 0){
+            return checkWord(word, start, mid);
+        }
+        return checkWord(word, mid+1, end);
+
     }
 
     // Prints all valid words to wordList.txt
